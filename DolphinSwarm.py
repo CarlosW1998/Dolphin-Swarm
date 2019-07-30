@@ -1,6 +1,8 @@
 from random import uniform, random
 from math import sin, cos, e
-
+from sklearn.neural_network import MLPClassifier
+from sklearn.datasets import load_iris
+import numpy as np
 class DSO:
     def __init__(self, popSize, soluSize, space, T1 = 3,
             T2 = 1000, speed=1, A=5, M=3, e=4):
@@ -33,7 +35,7 @@ class DSO:
                         vector = [x*(j+1) for x in i]
                         newSolution.append([x+y for x, y in zip(sol.solution, vector)])
                 bestSolution = min(newSolution, key = lambda x: fitness(x))
-                if(fitness(bestSolution) < fitness(sol.solutionL)): sol.solutionL = bestSolution
+                if(fitness(bestSolution) < fitness(sol.solutionL)): sol.solutionL = [el for el in bestSolution]
                 if(fitness(sol.solutionL) < fitness(sol.solutionK)): sol.solutionK = [el for el in sol.solutionL]
             #Call Phase
             for i in range(self.popSize):
@@ -62,13 +64,13 @@ class DSO:
                     sol.solution = [x+y for x, y in zip(ter, sol.solutionK)]
                 
                 if dsk > R1 and dsk >= dkl:
-                    R2 = (1 - ((dsk/fitness(sol.solutionK) + ((dsk-dkl)/fitness(sol.solutionL))/((e*dsk)/fitness(sol.solutionK)))))*dsk
+                    R2 = (1 - (((dsk/fitness(sol.solutionK) + ((dsk-dkl)/fitness(sol.solutionL)))/((e*dsk)/fitness(sol.solutionK)))))*dsk
                     ter = getVector(self.soluSize)
                     ter = [x*R2 for x in ter]
                     sol.solution = [x+y for x, y in zip(sol.solutionK, ter)]
                 
                 if dsk > R1 and dsk < dkl:
-                    R2 = (1 - ((dsk/fitness(sol.solutionK) - ((dsk-dkl)/fitness(sol.solutionL))/((e*dsk)/fitness(sol.solutionK)))))*dsk
+                    R2 = (1 - (((dsk/fitness(sol.solutionK) - ((dsk-dkl)/fitness(sol.solutionL)))/((e*dsk)/fitness(sol.solutionK)))))*dsk
                     ter = getVector(self.soluSize)
                     ter = [x*R2 for x in ter]
                     sol.solution = [x+y for x, y in zip(sol.solutionK, ter)]
@@ -93,9 +95,13 @@ def getVector(size):
     return v
 
 def fitness(solution):
-    solution[0] = round(solution[0], 5)
-    solution[1] = round(solution[1], 5)
-    try:
-        return (solution[0]**2 + solution[1]**2) + 4
-    except:
-        return 4
+    model = MLPClassifier(hidden_layer_sizes =(8, 5))
+    data = load_iris()
+    model.fit(data['data'], data['target'])
+    coef = []
+    coef.append(np.asarray([solution[i:i+8] for i in range(4)]))
+    coef.append(np.asarray([solution[32+i:32+i+5] for i in range(8)]))
+    coef.append(np.asarray([solution[72+i:72+i+3] for i in range(5)]))
+    model.coefs_ = coef
+    score = model.score(data['data'], data['target'])
+    return 1 - score

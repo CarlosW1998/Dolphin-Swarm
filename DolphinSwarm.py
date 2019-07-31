@@ -1,8 +1,13 @@
-from random import uniform, random
+from random import uniform, random, shuffle
 from math import sin, cos, e
 from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import load_iris
 import numpy as np
+data = load_iris()
+data = [(x, y) for x, y in zip(data['data'], data['target'])]
+shuffle(data)
+d, t = [x[0] for x in data], [x[1] for x in data]
+
 class DSO:
     def __init__(self, popSize, soluSize, space, T1 = 3,
             T2 = 1000, speed=1, A=5, M=3, e=4):
@@ -22,10 +27,12 @@ class DSO:
         
         
     def optimaze(self, generations=100):
+        incrise = []
         while generations > 0:
             print(generations)
             generations -=1
-            print((min(self.population, key=lambda x: fitness(x.solution))))
+            incrise.append(testData(((min(self.population, key=lambda x: fitness(x.solution)))).solution))
+            open('result.txt', 'w').write(str(incrise))
             #Search Phase
             for sol in (self.population):
                 sounds = [getVector(self.soluSize) for x in range(self.M)]
@@ -76,6 +83,7 @@ class DSO:
                     sol.solution = [x+y for x, y in zip(sol.solutionK, ter)]
                 if fitness(sol.solution) < fitness(sol.solutionK):
                     sol.solutionK = [el for el in sol.solution]
+        
         return (min(self.population, key=lambda x: fitness(x.solution)).solution)
                 
 def DD(i, j):
@@ -96,12 +104,21 @@ def getVector(size):
 
 def fitness(solution):
     model = MLPClassifier(hidden_layer_sizes =(8, 5))
-    data = load_iris()
-    model.fit(data['data'], data['target'])
+    model.fit(d, t)
     coef = []
     coef.append(np.asarray([solution[i:i+8] for i in range(4)]))
     coef.append(np.asarray([solution[32+i:32+i+5] for i in range(8)]))
     coef.append(np.asarray([solution[72+i:72+i+3] for i in range(5)]))
     model.coefs_ = coef
-    score = model.score(data['data'], data['target'])
+    score = model.score(d[:100], t[:100])
+    return 1 - score
+def testData(solution):
+    model = MLPClassifier(hidden_layer_sizes =(8, 5))
+    model.fit(d, t)
+    coef = []
+    coef.append(np.asarray([solution[i:i+8] for i in range(4)]))
+    coef.append(np.asarray([solution[32+i:32+i+5] for i in range(8)]))
+    coef.append(np.asarray([solution[72+i:72+i+3] for i in range(5)]))
+    model.coefs_ = coef
+    score = model.score(d[100:], t[100:])
     return 1 - score

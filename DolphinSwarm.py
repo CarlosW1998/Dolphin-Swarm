@@ -7,10 +7,10 @@ data = load_iris()
 data = [(x, y) for x, y in zip(data['data'], data['target'])]
 shuffle(data)
 d, t = [x[0] for x in data], [x[1] for x in data]
-
+SPEED = 1
 class DSO:
     def __init__(self, popSize, soluSize, space, T1 = 3,
-            T2 = 1000, speed=1, A=5, M=3, e=4):
+            T2 = 5, speed=SPEED, A=5, M=3, e=4):
         #Initialization phase 
         self.popSize = popSize
         self.soluSize = soluSize
@@ -18,6 +18,7 @@ class DSO:
         self.T1 = T1
         self.T2 = T2
         self.speed = speed
+        SPEED = self.speed
         self.A  = A
         self.M = M
         self.e = e
@@ -100,6 +101,7 @@ def getVector(size):
     v = [random() for i in range(size)]
     norm =(sum([x**2 for x in v]))**(1/2)
     v = [x/norm for x in v]
+    v = [x*SPEED for x in v]
     return v
 
 def fitness(solution):

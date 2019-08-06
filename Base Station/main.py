@@ -99,7 +99,7 @@ def main():
     #game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     #game.setup()
     #arcade.run()
-    m = DSO(30, nBases[CASE]*2, (0, 625))
+    m = DSO(30, nBases[CASE], (0, 625))
     m.optimaze()
 
 

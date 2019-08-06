@@ -38,7 +38,7 @@ def getCity():
     return city
 
 def fitness(circles):
-    circles = [(circles[i], circles[i+1]) for i in range(0, len(circles), 2)]
+    
     citys = getCity()
     cityArea = []
     for i in citys:
@@ -50,5 +50,3 @@ def fitness(circles):
     stationsBase = cascaded_union(stationsBase)
     finalp = cascaded_union([stationsBase, cityArea]) 
     return (finalp.area - stationsBase.area)
-
-

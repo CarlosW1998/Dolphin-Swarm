@@ -19,8 +19,8 @@ class DSO:
         self.M = M
         self.e = e
         self.TS = [[T2 for i in range(popSize)] for x in range(popSize)]
-        self.population = [Dolphin([uniform(*space) for i in 
-            range(soluSize)]) for x in range(popSize)]
+        self.population = [Dolphin([(uniform(*space), uniform(*space)) 
+            for i in range(soluSize)]) for x in range(popSize)]
         
         
     def optimaze(self, generations=100):
@@ -30,12 +30,12 @@ class DSO:
             print(min(self.population, key=lambda x: fitness(x.solution)))
             #Search Phase
             for sol in (self.population):
-                sounds = [getVector(self.soluSize) for x in range(self.M)]
+                sounds = [[getVector(2) for i in  range(self.soluSize)] for x in range(self.M)]
                 newSolution = []
                 for i in sounds:
                     for j in range(self.T1):
-                        vector = [x*(j+1) for x in i]
-                        newSolution.append([x+y for x, y in zip(sol.solution, vector)])
+                        vector = [(x[0]*(j+1), x[0]*(j+1)) for x in i]
+                        newSolution.append([(x[0]+y[0], x[1]+y[1]) for x, y in zip(sol.solution, vector)])
                 bestSolution = min(newSolution, key = lambda x: fitness(x))
                 if(fitness(bestSolution) < fitness(sol.solutionL)): sol.solutionL = [el for el in bestSolution]
                 if(fitness(sol.solutionL) < fitness(sol.solutionK)): sol.solutionK = [el for el in sol.solutionL]
@@ -60,28 +60,28 @@ class DSO:
                 dkl = DD(sol.solutionK, sol.solutionL)
                 if dsk <= R1 and dsk > 0:
                     R2 = (1-2/self.e)*dsk
-                    ter = [(x-y)*R2 for x, y in zip(sol.solution, sol.solutionK)]
-                    ter = [x/dsk for x in ter]
-                    sol.solution = [x+y for x, y in zip(ter, sol.solutionK)]
+                    ter = [((x[0]-y[0])*R2, (x[1]-y[1])*R2)for x, y in zip(sol.solution, sol.solutionK)]
+                    ter = [(x[0]/dsk, x[1]/dsk) for x in ter]
+                    sol.solution = [(x[0]+y[0], x[1]+y[1]) for x, y in zip(ter, sol.solutionK)]
                 
                 if dsk > R1 and dsk >= dkl:
                     R2 = (1 - (((dsk/fitness(sol.solutionK) + ((dsk-dkl)/fitness(sol.solutionL)))/((e*dsk)/fitness(sol.solutionK)))))*dsk
-                    ter = getVector(self.soluSize)
-                    ter = [x*R2 for x in ter]
-                    sol.solution = [x+y for x, y in zip(sol.solutionK, ter)]
+                    ter = [getVector(2) for i in range(self.soluSize)]
+                    ter = [(x[0]*R2, x[1]*R2) for x in ter]
+                    sol.solution = [(x[0]+y[0], x[1]+y[1]) for x, y in zip(sol.solutionK, ter)]
                 
                 if dsk > R1 and dsk < dkl:
                     R2 = (1 - (((dsk/fitness(sol.solutionK) - ((dsk-dkl)/fitness(sol.solutionL)))/((e*dsk)/fitness(sol.solutionK)))))*dsk
-                    ter = getVector(self.soluSize)
-                    ter = [x*R2 for x in ter]
-                    sol.solution = [x+y for x, y in zip(sol.solutionK, ter)]
+                    ter = [getVector(2) for i in range(self.soluSize)]
+                    ter = [(x[0]*R2, x[1]*R2) for x in ter]
+                    sol.solution = [(x[0]+y[0], x[1]+y[1]) for x, y in zip(sol.solutionK, ter)]
                 if fitness(sol.solution) < fitness(sol.solutionK):
                     sol.solutionK = [el for el in sol.solution]
         
         return (min(self.population, key=lambda x: fitness(x.solution)).solution)
                 
 def DD(i, j):
-    return (sum([(x-y)**2 for x, y in zip(i, j)]))**(1/2)
+    return (sum([((x[0]-y[0])**2+(x[1]-y[1])**2) for x, y in zip(i, j)]))**(1/2)
 
 class Dolphin:
     def __init__(self, solution):
